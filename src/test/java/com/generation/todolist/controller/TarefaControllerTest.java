@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
 
+import com.generation.todolist.repository.TarefaRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -24,6 +25,9 @@ public class TarefaControllerTest {
 
 	@Autowired
 	private TestRestTemplate testRestTemplate;
+
+	@Autowired
+	private TarefaRepository tarefaRepository;
 	
 	@Test
 	@DisplayName("Criar nova Tarefa")
@@ -39,6 +43,20 @@ public class TarefaControllerTest {
 		assertEquals(HttpStatus.CREATED, resposta.getStatusCode());
 		assertEquals(corpoRequisicao.getBody().getNome(), resposta.getBody().getNome());
 		
+	}
+
+	@Test
+	@DisplayName("Listar uma Tarefa Específica")
+	public void deveListarApenasUmaTarefa() {
+
+		Tarefa buscaTarefa = tarefaRepository.save(new Tarefa(0L, "Tarefa 02", "Tarefa numero 2",
+				"Maria", LocalDate.now(), true));
+
+		ResponseEntity<String> resposta = testRestTemplate
+				.exchange("/tarefas/" + buscaTarefa.getId(), HttpMethod.GET, null, String.class);
+
+		assertEquals(HttpStatus.OK, resposta.getStatusCode());
+
 	}
 
 }
