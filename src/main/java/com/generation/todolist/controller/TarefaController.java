@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import com.generation.todolist.model.Tarefa;
 import com.generation.todolist.repository.TarefaRepository;
 
-import java.util.Optional;
+import java.util.List;
 
 @RestController
 @RequestMapping("/tarefas")
@@ -32,8 +32,35 @@ public class TarefaController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 
+	@GetMapping
+	public ResponseEntity<List<Tarefa>> getAll(){
+		return ResponseEntity.ok(tarefaRepository.findAll());
+	}
 
+	@GetMapping("/nome/{nome}")
+	public ResponseEntity<List<Tarefa>> getByNome(@PathVariable String nome){
+		return ResponseEntity.ok(tarefaRepository.findAllByNomeContainingIgnoreCase(nome));
+	}
 
-	
+	@PutMapping
+	public ResponseEntity<Tarefa> putTema(@Valid @RequestBody Tarefa tarefa){
+
+		return tarefaRepository.findById(tarefa.getId())
+				.map(resposta -> {
+					return ResponseEntity.ok().body(tarefaRepository.save(tarefa));
+				})
+				.orElse(ResponseEntity.notFound().build());
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deletePostagem(@PathVariable Long id){
+
+		return tarefaRepository.findById(id)
+				.map(resposta -> {
+					tarefaRepository.deleteById(id);
+					return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+				})
+				.orElse(ResponseEntity.notFound().build());
+	}
 }
 

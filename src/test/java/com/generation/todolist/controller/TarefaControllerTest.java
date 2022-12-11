@@ -59,4 +59,62 @@ public class TarefaControllerTest {
 
 	}
 
+	@Test
+	@DisplayName("Listar todas as tarefas")
+	public void deveListarTodasAsTarefas(){
+
+		tarefaRepository.save(new Tarefa(
+				0l, "Tarefa 03", "Tarefa numero 03", "Mariazinha", LocalDate.now(),false));
+
+		ResponseEntity<String> resposta = testRestTemplate
+				.exchange("/tarefas", HttpMethod.GET, null, String.class);
+
+		assertEquals(HttpStatus.OK, resposta.getStatusCode());
+	}
+
+	@Test
+	@DisplayName("Listar todas as Tarefas que contem um Nome Especifico")
+	public void deveListarTodasAsTarefasComNomeEspecifico(){
+
+		tarefaRepository.save(new Tarefa(
+				0l, "Tarefa 04", "Tarefa numero 04", "Mariana", LocalDate.now(),true));
+
+		ResponseEntity<String> resposta = testRestTemplate
+				.exchange("/tarefas/nome/Tarefa 04", HttpMethod.GET, null, String.class);
+
+		assertEquals(HttpStatus.OK, resposta.getStatusCode());
+	}
+
+	@Test
+	@DisplayName("Atualizar uma tarefa especifica")
+	public void deveAtualizarUmaTarefa(){
+
+		Tarefa buscarTarefa = tarefaRepository.save(new Tarefa(
+				0l, "Tarefa 05", "Tarefa numero 05", "Carlos", LocalDate.now(),true));
+
+		Tarefa atualizarTarefa = tarefaRepository.save(new Tarefa(
+				buscarTarefa.getId(), "Tarefa 05- Up", "Tarefa numero 05 - Up", "Carlos", LocalDate.now(),false));
+
+		HttpEntity<Tarefa> corpoRequisicao = new HttpEntity<Tarefa>(atualizarTarefa);
+
+		ResponseEntity<Tarefa> corpoResposta = testRestTemplate
+				.withBasicAuth("root", "root")
+				.exchange("/tarefas", HttpMethod.POST, corpoRequisicao, Tarefa.class);
+
+		assertEquals(HttpStatus.OK, corpoResposta.getStatusCode());
+		assertEquals(corpoRequisicao.getBody().getNome(), corpoResposta.getBody().getNome());
+	}
+
+	@Test
+	@DisplayName("Apagar uma Tarefa")
+	public void deveApagarUmaTarefa(){
+		Tarefa buscarTarefa = tarefaRepository.save(new Tarefa(
+				0l, "Tarefa 06", "Tarefa numero 06", "Joao", LocalDate.now(),true));
+
+		ResponseEntity<String> resposta = testRestTemplate
+				.exchange("/tarefas/"+ buscarTarefa.getId(), HttpMethod.DELETE, null, String.class);
+
+		assertEquals(HttpStatus.NO_CONTENT, resposta.getStatusCode());
+	}
+
 }
